@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe Laboratorio - Fricción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; color: #1f2937; }
+        
+        /* Estilos para impresión y exportación a PDF */
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .print-border-none { border: none !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+            input, textarea { border: none !important; background: transparent !important; resize: none !important; overflow: hidden; }
+            .shadow-lg { box-shadow: none !important; }
+            .max-w-4xl { max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .page-break { page-break-before: always; }
+        }
+
+        .input-field {
+            width: 100%; border: 1px solid #d1d5db; border-radius: 0.375rem; padding: 0.5rem; transition: border-color 0.15s;
+        }
+        .input-field:focus { outline: none; border-color: #3b82f6; ring: 2px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        th, td { border: 1px solid #d1d5db; padding: 0.5rem; text-align: center; }
+        th { background-color: #f9fafb; font-weight: 600; }
+        td input { width: 100%; border: none; text-align: center; background: transparent; outline: none; }
+        td input:focus { background-color: #eff6ff; }
+        
+        .upload-area {
+            border: 2px dashed #9ca3af; border-radius: 0.5rem; padding: 2rem; text-align: center; cursor: pointer; transition: background 0.2s;
+        }
+        .upload-area:hover { background-color: #f3f4f6; }
+        .preview-img { max-width: 100%; max-height: 400px; margin-top: 1rem; border-radius: 0.375rem; display: none; }
+    </style>
+</head>
+<body class="py-8 px-4">
+
+    <!-- Botón Flotante para Imprimir/PDF -->
+    <button onclick="window.print()" class="no-print fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform transform hover:scale-105 flex items-center gap-2 z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+        </svg>
+        Guardar como PDF
+    </button>
+
+    <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 shadow-lg rounded-xl">
+        
+        <!-- Encabezado -->
+        <div class="border-b-2 border-gray-800 pb-6 mb-8 text-center">
+            <h2 class="text-lg font-semibold text-blue-800 uppercase tracking-wider mb-2">Universidad de América</h2>
+            <h1 class="text-3xl font-bold uppercase tracking-wide text-gray-900">Informe Completo de Laboratorio</h1>
+            <h2 class="text-xl text-gray-600 mt-2 mb-3">Pérdidas de Energía Primarias en Régimen Laminar y Turbulento</h2>
+            <p class="text-md text-gray-600 font-medium font-bold">Docente: Ph. D. Juan Sandoval Herrera</p>
+        </div>
+
+        <!-- Datos del Grupo -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-50 p-6 rounded-lg print-border-none">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Fecha de realización:</label>
+                <input type="date" class="input-field">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Grupo de Laboratorio:</label>
+                <input type="text" placeholder="Ej. Lunes 8-10 am" class="input-field">
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Temperatura del agua medida en la sesión (°C):</label>
+                <input type="number" step="0.1" placeholder="Ej. 22.5" class="input-field w-full md:w-1/3">
+            </div>
+            
+            <div class="md:col-span-2 mt-4">
+                <h3 class="font-bold text-gray-800 mb-3 border-b pb-1">Integrantes</h3>
+                <div class="space-y-3">
+                    <div class="flex gap-4 items-center">
+                        <span class="font-bold">1.</span>
+                        <input type="text" placeholder="Nombre completo" class="input-field flex-grow">
+                        <input type="text" id="cod1" placeholder="Código" class="input-field w-32" oninput="updateReto()">
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <span class="font-bold">2.</span>
+                        <input type="text" placeholder="Nombre completo" class="input-field flex-grow">
+                        <input type="text" placeholder="Código" class="input-field w-32">
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <span class="font-bold">3.</span>
+                        <input type="text" placeholder="Nombre completo" class="input-field flex-grow">
+                        <input type="text" placeholder="Código" class="input-field w-32">
+                    </div>
+                    <div class="flex gap-4 items-center">
+                        <span class="font-bold">4.</span>
+                        <input type="text" placeholder="Nombre completo (Opcional)" class="input-field flex-grow">
+                        <input type="text" placeholder="Código" class="input-field w-32">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Objetivos y Parámetros -->
+        <div class="mb-8">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">1. OBJETIVOS</h3>
+            <ul class="list-disc pl-6 space-y-1 text-gray-700">
+                <li>Determinar experimentalmente el factor de fricción (\(f\)) para flujos laminares y turbulentos en un tubo de 3.0 mm de diámetro.</li>
+                <li>Comparar los resultados experimentales con los modelos teóricos de Poiseuille, Blasius y Swamee-Jain.</li>
+                <li>Ubicar los puntos experimentales en un Diagrama de Moody y analizar su comportamiento.</li>
+            </ul>
+        </div>
+
+        <div class="mb-8">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">2. PARÁMETROS DEL EQUIPO (GUNT HM 150.01) Y FLUIDO</h3>
+            <ul class="space-y-2 text-gray-700">
+                <li><strong>Longitud de prueba del tubo (\(L\)):</strong> 400 mm = 0.4 m</li>
+                <li><strong>Diámetro interno del tubo (\(D\)):</strong> 3.0 mm = 0.003 m <em>(El mismo para ambos regímenes)</em></li>
+                <li><strong>Material del tubo:</strong> Cobre liso (Rugosidad absoluta \(\varepsilon \approx 1.5 \times 10^{-6}\) m).</li>
+                <li class="flex items-center gap-2">
+                    <strong>Densidad del agua (\(\rho\)):</strong> 
+                    <input type="text" class="input-field w-24 text-center border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent" placeholder="Valor"> \(kg/m^3\)
+                </li>
+                <li class="flex items-center gap-2">
+                    <strong>Viscosidad cinemática (\(\nu\)):</strong> 
+                    <input type="text" class="input-field w-24 text-center border-b border-t-0 border-l-0 border-r-0 rounded-none bg-transparent" placeholder="Valor"> \(m^2/s\)
+                </li>
+            </ul>
+        </div>
+
+        <!-- 3. Toma de Datos -->
+        <div class="mb-10">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">3. TOMA DE DATOS EXPERIMENTALES</h3>
+            
+            <h4 class="font-bold text-gray-700 mt-4 mb-2">Tabla 1: Régimen Laminar (Alimentación por depósito)</h4>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ensayo</th>
+                            <th>Volumen (L)</th>
+                            <th>Tiempo (s)</th>
+                            <th>Caudal Q (\(m^3/s\))</th>
+                            <th>\(h_1\) (mmCA)</th>
+                            <th>\(h_2\) (mmCA)</th>
+                            <th>\(\Delta h\) (m)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>L-1</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>L-2</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>L-3</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>L-4</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="font-bold text-gray-700 mt-6 mb-2">Tabla 2: Régimen Turbulento (Alimentación por bypass)</h4>
+            <div class="overflow-x-auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ensayo</th>
+                            <th>Volumen (L)</th>
+                            <th>Tiempo (s)</th>
+                            <th>Caudal Q (\(m^3/s\))</th>
+                            <th>\(\Delta P\) (mbar)</th>
+                            <th>\(\Delta P\) (Pa)</th>
+                            <th>\(\Delta h = \frac{\Delta P}{\rho g}\) (m)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>T-1</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>T-2</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>T-3</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>T-4</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="page-break"></div> <!-- Salto de página para imprimir -->
+
+        <!-- 4. Memoria de Cálculo -->
+        <div class="mb-10">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">4. MEMORIA DE CÁLCULO MUESTRA</h3>
+            <div class="bg-blue-50 p-4 border border-blue-200 rounded-lg mb-4 text-sm">
+                <strong>Instrucción obligatoria:</strong> Seleccione el ensayo N° 2 del régimen turbulento y escriba <strong>A MANO</strong> el paso a paso del cálculo. Tome una foto clara y súbala aquí. Debe mostrar:
+                <ol class="list-decimal pl-5 mt-2">
+                    <li>Cálculo de velocidad (\(v\)) y Número de Reynolds (\(Re\)).</li>
+                    <li>Cálculo del factor de fricción experimental (\(f_{exp}\)) despejado de Darcy-Weisbach.</li>
+                    <li>Cálculo del factor teórico según Blasius y según Swamee-Jain.</li>
+                    <li>Cálculo del porcentaje de error relativo para ambas teorías.</li>
+                </ol>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                <div class="text-sm text-gray-600 bg-gray-100 p-4 rounded-lg">
+                    <strong>Ecuaciones a utilizar:</strong>
+                    <ul class="space-y-2 mt-2">
+                        <li><strong>Darcy-Weisbach:</strong> \(h_f = f \cdot \frac{L}{D} \cdot \frac{v^2}{2g}\)</li>
+                        <li><strong>Poiseuille (Lam):</strong> \(f_{teo} = \frac{64}{Re}\)</li>
+                        <li><strong>Blasius (Turb):</strong> \(f_{teo} = \frac{0.3164}{Re^{0.25}}\)</li>
+                        <li><strong>Swamee-Jain:</strong> <br> \(f_{teo} = \frac{0.25}{\left[ \log_{10} \left( \frac{\varepsilon}{3.7D} + \frac{5.74}{Re^{0.9}} \right) \right]^2}\)</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center">
+                    <input type="file" id="calcImgInput" class="hidden no-print" accept="image/*" onchange="previewImage(event, 'calcPreview')">
+                    <label for="calcImgInput" class="upload-area block no-print">
+                        <span class="text-gray-500 flex flex-col items-center">
+                            <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            Haz clic para subir la foto de los cálculos a mano
+                        </span>
+                    </label>
+                    <img id="calcPreview" class="preview-img mx-auto border shadow-sm" alt="Memoria de cálculo">
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Tabla Resumen -->
+        <div class="mb-10">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">5. TABLA RESUMEN DE RESULTADOS</h3>
+            <div class="overflow-x-auto">
+                <table class="text-sm">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Ensayo</th>
+                            <th rowspan="2">Vel. v (m/s)</th>
+                            <th rowspan="2">Re</th>
+                            <th rowspan="2">\(f_{exp}\)</th>
+                            <th colspan="2">Modelos Teóricos</th>
+                            <th colspan="2">% Error Relativo</th>
+                        </tr>
+                        <tr>
+                            <th>\(f_{Blasius}\) <br><span class="text-xs font-normal">(o Poiseuille)</span></th>
+                            <th>\(f_{Swamee}\) <br><span class="text-xs font-normal">(solo Turb)</span></th>
+                            <th>Vs. Blasius</th>
+                            <th>Vs. Swamee</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>L-1</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td class="bg-gray-100">N/A</td><td><input type="text"></td><td class="bg-gray-100">N/A</td></tr>
+                        <tr><td>L-2</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td class="bg-gray-100">N/A</td><td><input type="text"></td><td class="bg-gray-100">N/A</td></tr>
+                        <tr><td>L-3</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td class="bg-gray-100">N/A</td><td><input type="text"></td><td class="bg-gray-100">N/A</td></tr>
+                        <tr><td>L-4</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td class="bg-gray-100">N/A</td><td><input type="text"></td><td class="bg-gray-100">N/A</td></tr>
+                        <tr class="border-t-2 border-gray-400"><td>T-1</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>T-2</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>T-3</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                        <tr><td>T-4</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- 6. Análisis Gráfico -->
+        <div class="mb-10">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">6. ANÁLISIS GRÁFICO (El Diagrama de Moody)</h3>
+            <p class="text-sm text-gray-700 mb-4">Adjunte el gráfico generado en Excel/Python. Ejes en escala logarítmica, mostrando las curvas teóricas superpuestas con los puntos experimentales.</p>
+            
+            <div class="text-center">
+                <input type="file" id="graphImgInput" class="hidden no-print" accept="image/*" onchange="previewImage(event, 'graphPreview')">
+                <label for="graphImgInput" class="upload-area block no-print">
+                    <span class="text-gray-500 flex flex-col items-center">
+                        <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Haz clic para subir la imagen del Diagrama de Moody
+                    </span>
+                </label>
+                <img id="graphPreview" class="preview-img mx-auto border shadow-sm" alt="Diagrama de Moody">
+            </div>
+        </div>
+
+        <!-- 7. Conclusiones -->
+        <div class="mb-10">
+            <h3 class="text-xl font-bold border-b-2 border-blue-600 inline-block mb-4">7. ANÁLISIS DE RESULTADOS Y CONCLUSIONES</h3>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block font-bold text-gray-800 mb-2">1. Precisión de los Modelos:</label>
+                    <p class="text-sm text-gray-600 mb-2">En la zona turbulenta, ¿cuál ecuación (Blasius o Swamee-Jain) presentó un menor error respecto a sus datos experimentales? Discuta por qué, considerando el concepto de "tubo liso" vs "rugosidad relativa".</p>
+                    <textarea class="input-field w-full h-24" placeholder="Escriba su análisis aquí..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block font-bold text-gray-800 mb-2">2. Transición:</label>
+                    <p class="text-sm text-gray-600 mb-2">Observe su diagrama de Moody. Si hubo puntos en la zona crítica (2300 < Re < 4000), describa el comportamiento del factor de fricción allí comparado con las zonas estables. ¿Fue predecible?</p>
+                    <textarea class="input-field w-full h-24" placeholder="Escriba su análisis aquí..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-gray-800 mb-2">3. Fuentes de Error:</label>
+                    <p class="text-sm text-gray-600 mb-2">Al margen del error de paralaje, ¿qué factor físico (temperatura, purga de aire, fluctuaciones) considera que afectó más la precisión de \(\Delta h\)? Justifique usando las ecuaciones.</p>
+                    <textarea class="input-field w-full h-24" placeholder="Escriba su análisis aquí..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- 8. Reto de Aplicación (Dinámico) -->
+        <div class="mb-6 bg-red-50 border-l-4 border-red-600 p-6 rounded-r-lg">
+            <h3 class="text-xl font-bold text-red-800 mb-2">8. RETO DE APLICACIÓN (Resolución Individualizada)</h3>
+            <p class="text-sm text-gray-700 mb-4 font-bold uppercase no-print">El caudal Q se actualiza automáticamente con el último dígito del código del Integrante 1.</p>
+            
+            <p class="text-gray-800 mb-4">
+                Se desea escalar este sistema experimental para bombear un fluido en la industria alimentaria. La nueva tubería tendrá una longitud de <strong>25 metros</strong> y el mismo diámetro (<strong>3.0 mm</strong>). El caudal de operación será:
+            </p>
+
+            <div class="bg-white border border-red-200 py-4 px-6 text-center text-xl font-bold rounded shadow-sm mb-6">
+                Q = (1.5 + 0.<span id="reto-digit" class="text-red-600 text-2xl underline">X</span>) &times; 10<sup>-4</sup> m<sup>3</sup>/s
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-bold text-gray-800">a) El Número de Reynolds e indique si el flujo es laminar o turbulento:</label>
+                    <textarea class="input-field w-full mt-1" rows="2" placeholder="Cálculo y respuesta..."></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-800">b) El factor de fricción usando la ecuación de Swamee-Jain (asuma \(\varepsilon = 1.5 \times 10^{-6}\) m):</label>
+                    <textarea class="input-field w-full mt-1" rows="2" placeholder="Cálculo y respuesta..."></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-800">c) La caída de presión teórica (\(\Delta P\) en Pascales) a vencer en ese tramo:</label>
+                    <textarea class="input-field w-full mt-1" rows="3" placeholder="Cálculo y respuesta final..."></textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Script Lógica -->
+    <script>
+        // Actualizar dinámica de la X en la ecuación según el código del estudiante 1
+        function updateReto() {
+            const codInput = document.getElementById('cod1').value;
+            let lastDigit = 'X';
+            
+            if (codInput && codInput.trim().length > 0) {
+                // Tomar el último caracter que sea un número, si no hay, dejar X
+                const numbersOnly = codInput.replace(/\D/g, '');
+                if(numbersOnly.length > 0){
+                    lastDigit = numbersOnly.slice(-1);
+                }
+            }
+            
+            document.getElementById('reto-digit').innerText = lastDigit;
+        }
+
+        // Previsualizar imágenes cargadas
+        function previewImage(event, previewId) {
+            const input = event.target;
+            const preview = document.getElementById(previewId);
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    // Ocultar el label de "Haz clic para subir" al cargar imagen
+                    input.nextElementSibling.style.display = 'none'; 
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>
